@@ -8,4 +8,4 @@ RUN cat /etc/sudoers
 
 USER build
 RUN cd /tmp && git clone https://aur.archlinux.org/yay.git
-RUN cd /tmp/yay && sudo pacman -Syu --noconfirm && makepkg -sri
+RUN cd /tmp/yay && sudo pacman -Syu --noconfirm && makepkg -sri --noconfirm
