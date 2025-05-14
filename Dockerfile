@@ -1,5 +1,4 @@
 FROM ghcr.io/punkops/aur:latest
 
-USER root
-COPY entrypoint.sh /entrypoint.sh
+USER build
 ENTRYPOINT ["/entrypoint.sh"]
