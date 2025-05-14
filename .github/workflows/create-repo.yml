@@ -1,0 +1,15 @@
+name: Create Custom Arch Repository
+
+on:
+  push: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Build and create repository
+      uses: taonga07/CustomArchRepo@v1
