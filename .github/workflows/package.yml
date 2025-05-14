@@ -12,17 +12,21 @@ jobs:
   build-aur:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create output directory
+        run: mkdir -p ${{ github.workspace }}/yay-cache
 
-      - name: Build AUR package with yay
-        uses: ./
+      - name: Build AUR package in Docker
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/yay-cache:/home/build/.cache/yay \
+            ghcr.io/punkops/aur:latest \
+            "${{ github.event.inputs.package }}"
+
+      - name: Upload built package(s)
+        uses: actions/upload-artifact@v4
         with:
-          package: ${{ github.event.inputs.package }}
+          name: built-packages
+          path: yay-cache/**/*.pkg.tar.*

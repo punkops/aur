@@ -22,7 +22,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./builder
-          file: ./builder/Dockerfile
+          context: .
+          file: Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
