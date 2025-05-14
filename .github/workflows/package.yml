@@ -1,0 +1,21 @@
+name: Build AUR package
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'AUR package to build'
+        required: true
+        default: 'plex-desktop'
+
+jobs:
+  build-aur:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build AUR package with yay
+        uses: ./
+        with:
+          package: ${{ github.event.inputs.package }}
