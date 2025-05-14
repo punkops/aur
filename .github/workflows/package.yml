@@ -18,6 +18,13 @@ jobs:
       - name: Create output directory
         run: mkdir -p ${{ github.workspace }}/yay-cache
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build AUR package in Docker
         run: |
           docker run --rm \
