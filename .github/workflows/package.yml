@@ -1,4 +1,4 @@
-name: Build AUR package
+name: Build and Publish AUR Package Repo
 
 on:
   workflow_dispatch:
@@ -11,15 +11,18 @@ on:
 jobs:
   build-aur:
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create output directory
-        run: mkdir -p ${{ github.workspace }}/yay-cache
+      - name: Prepare output directory
+        run: mkdir -p ${{ github.workspace }}/repo/x86_64
 
-      - name: Set permissions on cache dir
-        run: sudo chown -R 1000:1000 ${{ github.workspace }}/yay-cache
+      - name: Set permissions on output dir
+        run: sudo chown -R 1000:1000 ${{ github.workspace }}/repo/x86_64 || true
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -31,12 +34,32 @@ jobs:
       - name: Build AUR package in Docker
         run: |
           docker run --rm \
-            -v ${{ github.workspace }}/yay-cache:/home/build/.cache/yay \
+            -v ${{ github.workspace }}/repo/x86_64:/home/build/.cache/yay \
             ghcr.io/punkops/aur:latest \
             "${{ github.event.inputs.package }}"
 
-      - name: Upload built package(s)
-        uses: actions/upload-artifact@v4
+      - name: Move built packages to root (flatten)
+        run: |
+          cd ${{ github.workspace }}/repo/x86_64
+          find . -type f -name "*.pkg.tar.*" ! -path "./*.pkg.tar.*" -exec mv -t . {} +
+
+      - name: Remove all subdirectories (cleanup)
+        run: |
+          cd ${{ github.workspace }}/repo/x86_64
+          find . -mindepth 1 -type d -exec rm -rf {} +
+
+      - name: Create repo database (in Arch container)
+        run: |
+          docker run --rm -v ${{ github.workspace }}/repo/x86_64:/repo archlinux:latest \
+            bash -c "pacman -Sy --noconfirm && \
+                    pacman -S --noconfirm pacman && \
+                    cd /repo && \
+                    repo-add punkops.db.tar.gz *.pkg.tar.*"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: built-packages
-          path: yay-cache/**/*.pkg.tar.*
+          path: repo
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
