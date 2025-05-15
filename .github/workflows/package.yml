@@ -48,7 +48,7 @@ jobs:
       - name: Remove all subdirectories (cleanup)
         run: |
           cd ${{ github.workspace }}/repo/x86_64
-          find . -mindepth 1 -type d -exec rm -rf {} +
+          sudo find . -mindepth 1 -type d -exec rm -rf {} +
 
       - name: Create repo database (in Arch container)
         run: |
