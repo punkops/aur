@@ -12,8 +12,10 @@ jobs:
   build-aur:
     runs-on: ubuntu-latest
     permissions:
-      pages: write
+      contents: read
+      packages: read
       id-token: write
+      pages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
